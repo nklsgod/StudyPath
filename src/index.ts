@@ -1,9 +1,14 @@
 import express from 'express';
 import helmet from 'helmet';
 import cors from 'cors';
+import compression from 'compression';
+import { globalErrorHandler, notFoundHandler } from './middleware/errorHandler';
 
 const app = express();
 const port = process.env.PORT || 3000;
+
+// Compression middleware
+app.use(compression());
 
 // Security middleware
 app.use(helmet());
@@ -32,6 +37,12 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.get('/', (req, res) => {
   res.json({ message: 'StudyPath API is running!' });
 });
+
+// 404 handler - must be after all routes
+app.use(notFoundHandler);
+
+// Global error handler - must be last
+app.use(globalErrorHandler);
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
