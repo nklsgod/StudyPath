@@ -70,8 +70,10 @@ jobs:
     - name: Build application
       run: npm run build
     
+    - name: Install Railway CLI
+      run: npm install -g @railway/cli
+    
     - name: Deploy to Railway
-      uses: railway-community/action@v1
-      with:
-        service: ${{ secrets.RAILWAY_SERVICE }}
-        token: ${{ secrets.RAILWAY_TOKEN }}
+      run: railway deploy
+      env:
+        RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
