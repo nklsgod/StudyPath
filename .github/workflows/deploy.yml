@@ -75,7 +75,6 @@ jobs:
     
     - name: Deploy to Railway
       run: |
-        railway login --token $RAILWAY_TOKEN
         railway link $RAILWAY_PROJECT_ID
         railway deploy
       env:
