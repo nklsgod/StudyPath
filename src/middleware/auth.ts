@@ -11,8 +11,7 @@ declare global {
       user?: {
         id: string;
         email: string;
-        firstName: string;
-        lastName: string;
+        name: string;
       };
     }
   }
@@ -33,11 +32,10 @@ export const generateToken = (userId: string, email: string): string => {
     throw new Error('JWT_SECRET is not defined in environment variables');
   }
 
-  return jwt.sign(
-    { userId, email },
-    secret,
-    { expiresIn }
-  );
+  const payload = { userId, email };
+  const options = { expiresIn } as jwt.SignOptions;
+
+  return jwt.sign(payload, secret, options);
 };
 
 export const verifyToken = (token: string): JwtPayload => {
@@ -76,8 +74,7 @@ export const authenticateToken = async (
       .select({
         id: users.id,
         email: users.email,
-        firstName: users.firstName,
-        lastName: users.lastName
+        name: users.name
       })
       .from(users)
       .where(eq(users.id, decoded.userId))
@@ -148,8 +145,7 @@ export const optionalAuth = async (
       .select({
         id: users.id,
         email: users.email,
-        firstName: users.firstName,
-        lastName: users.lastName
+        name: users.name
       })
       .from(users)
       .where(eq(users.id, decoded.userId))
