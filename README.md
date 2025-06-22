@@ -1,4 +1,5 @@
 # StudyPath
+
 THM DMS Studienplaner mit KI Unterstützung
 
 A study planning application for THM (Technische Hochschule Mittelhessen) students built with TypeScript, Express, and Drizzle ORM.
@@ -22,11 +23,13 @@ A study planning application for THM (Technische Hochschule Mittelhessen) studen
 ## Setup
 
 ### Prerequisites
+
 - Node.js (version 18 or higher)
 - npm
 - Docker (for PostgreSQL database)
 
 ### Installation
+
 1. Clone the repository
 2. Install dependencies:
    ```bash
@@ -55,6 +58,7 @@ A study planning application for THM (Technische Hochschule Mittelhessen) studen
 The server will start on port 3000 by default.
 
 ### Scripts
+
 - `npm run dev` - Start development server with nodemon
 - `npm run build` - Build TypeScript to JavaScript
 - `npm start` - Start production server
@@ -69,12 +73,14 @@ The server will start on port 3000 by default.
 The project uses PostgreSQL with Drizzle ORM. The database includes:
 
 ### Module Pools
+
 - **Orientierungsphase** (7 modules) - Foundation courses
 - **IT Vertiefung** (11 modules) - Core IT specialization courses
 - **Überfachlicher Pool** (21 modules) - General education courses
 - **Wahlpflichtpool** (57 modules) - Elective courses
 
 ### Tables
+
 - **users**: Student accounts with authentication
 - **modules**: Complete THM course catalog with pool, code, name, credits, category
 - **user_modules**: Student progress tracking with status, grades, notes
@@ -82,6 +88,7 @@ The project uses PostgreSQL with Drizzle ORM. The database includes:
 - **study_plan_modules**: Modules assigned to specific study plans
 
 ### Sample Modules
+
 - **MAN1001**: Grundlagen und Unternehmenssoftware (10 credits, MAN)
 - **INF1001**: Webbasierte Programmierung 1 (10 credits, INF)
 - **INF2528**: Machine Learning (6 credits, INF)

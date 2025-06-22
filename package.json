@@ -28,6 +28,7 @@
   "dependencies": {
     "compression": "^1.8.0",
     "cors": "^2.8.5",
+    "drizzle-orm": "^0.44.2",
     "express": "^5.1.0",
     "helmet": "^8.1.0",
     "joi": "^17.13.3"
