@@ -6,7 +6,7 @@ export const validateRequest = (schema: {
   query?: Joi.ObjectSchema;
   params?: Joi.ObjectSchema;
 }) => {
-  return (req: Request, res: Response, next: NextFunction) => {
+  return (req: Request, res: Response, next: NextFunction): void => {
     const validationErrors: string[] = [];
 
     // Validate body
@@ -34,13 +34,14 @@ export const validateRequest = (schema: {
     }
 
     if (validationErrors.length > 0) {
-      return res.status(400).json({
+      res.status(400).json({
         success: false,
         error: {
           message: 'Validation failed',
           details: validationErrors
         }
       });
+      return;
     }
 
     next();

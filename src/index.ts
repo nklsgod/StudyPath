@@ -3,6 +3,7 @@ import helmet from 'helmet';
 import cors from 'cors';
 import compression from 'compression';
 import { globalErrorHandler, notFoundHandler } from './middleware/errorHandler';
+import authRoutes from './routes/auth';
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -33,6 +34,9 @@ app.use(
 // Body parsing middleware
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// Routes
+app.use('/auth', authRoutes);
 
 app.get('/', (req, res) => {
   res.json({ message: 'StudyPath API is running!' });
