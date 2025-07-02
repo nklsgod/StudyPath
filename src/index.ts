@@ -4,6 +4,7 @@ import cors from 'cors';
 import compression from 'compression';
 import { globalErrorHandler, notFoundHandler } from './middleware/errorHandler';
 import authRoutes from './routes/auth';
+import moduleRoutes from './routes/modules';
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -37,6 +38,7 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Routes
 app.use('/auth', authRoutes);
+app.use('/modules', moduleRoutes);
 
 app.get('/', (req, res) => {
   res.json({ message: 'StudyPath API is running!' });
