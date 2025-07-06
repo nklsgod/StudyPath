@@ -7,6 +7,7 @@ import { globalErrorHandler, notFoundHandler } from './middleware/errorHandler';
 import authRoutes from './routes/auth';
 import moduleRoutes from './routes/modules';
 import studyPlanRoutes from './routes/studyPlans';
+import recommendationRoutes from './routes/recommendations';
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -42,6 +43,7 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use('/auth', authRoutes);
 app.use('/modules', moduleRoutes);
 app.use('/study-plans', studyPlanRoutes);
+app.use('/recommendations', recommendationRoutes);
 
 app.get('/', (req, res) => {
   res.json({ 
@@ -74,11 +76,31 @@ app.get('/', (req, res) => {
         'PUT /study-plans/:id/modules/:pool': 'Update module in study plan',
         'DELETE /study-plans/:id/modules/:pool': 'Remove module from study plan',
         'GET /study-plans/:id/summary': 'Get study plan statistics'
+      },
+      recommendations: {
+        'GET /recommendations/modules': 'AI-powered personalized module recommendations',
+        'POST /recommendations/study-plan': 'Optimize study plan with AI algorithms',
+        'GET /recommendations/insights': 'Get intelligent study insights and analytics'
       }
     },
     database: {
       moduleCount: '96 THM modules available',
       pools: ['Orientierungsphase', 'IT Vertiefung', 'Überfachlicher Pool', 'Wahlpflichtpool']
+    },
+    ai: {
+      features: [
+        'Personalized module recommendations based on performance',
+        'Intelligent study plan optimization with semester distribution',
+        'Academic performance insights and early warning system',
+        'Workload balancing and difficulty assessment',
+        'Smart prerequisite detection and semester planning'
+      ],
+      algorithms: [
+        'Multi-factor scoring for module recommendations',
+        'Bin-packing optimization for semester distribution',
+        'Performance-based difficulty matching',
+        'Category expertise analysis'
+      ]
     }
   });
 });

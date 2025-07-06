@@ -10,6 +10,10 @@ A study planning application for THM (Technische Hochschule Mittelhessen) studen
 - **Study Plan Management**: Create and manage custom study plans
 - **Progress Tracking**: Track module completion and grades
 - **Module Organization**: Modules organized by pools (Orientierungsphase, IT Vertiefung, etc.)
+- **🤖 AI-Powered Recommendations**: Intelligent module suggestions based on your performance
+- **📊 Smart Study Plan Optimization**: Automatic semester distribution with workload balancing
+- **💡 Academic Insights**: Performance analytics and early warning system
+- **🎯 Personalized Learning Paths**: Difficulty assessment and prerequisite detection
 - **Type-Safe Database**: Drizzle ORM with full TypeScript support
 - **Security**: Helmet, CORS, compression, and validation middleware
 
@@ -94,6 +98,43 @@ The project uses PostgreSQL with Drizzle ORM. The database includes:
 - **INF2528**: Machine Learning (6 credits, INF)
 - **INF2549**: KI in der Anwendung: Sprachverarbeitung mit Transformern (6 credits, INF)
 
+## AI Features
+
+### 🤖 Intelligent Module Recommendations
+
+- **Performance-Based Scoring**: Recommendations adapt to your academic performance
+- **Category Expertise Analysis**: Suggests modules based on your strengths
+- **Workload Balancing**: Considers your current semester load
+- **Focus Area Optimization**: Prioritizes modules in your chosen specialization
+
+### 📊 Smart Study Plan Optimization
+
+- **Bin-Packing Algorithm**: Optimally distributes modules across semesters
+- **Prerequisite Detection**: Automatically identifies module dependencies
+- **Credit Balancing**: Ensures manageable workload per semester
+- **Foundation-First Approach**: Prioritizes Orientierungsphase modules
+
+### 💡 Academic Insights
+
+- **Performance Analytics**: Track your academic progress trends
+- **Early Warning System**: Alerts for high workload or performance issues
+- **Study Plan Suggestions**: Recommendations for creating your first plan
+- **Category Balance Analysis**: Ensures well-rounded education
+
 ## API Structure
 
-The application follows RESTful API principles with proper error handling, validation, and security middleware.
+The application provides comprehensive RESTful APIs with AI-powered features:
+
+### Core APIs
+
+- **Authentication**: User registration, login, JWT token management
+- **Module Management**: Browse, search, enroll, and track progress
+- **Study Plans**: Create, manage, and optimize study plans
+
+### 🤖 AI-Powered APIs
+
+- **GET /recommendations/modules**: Personalized module recommendations
+- **POST /recommendations/study-plan**: Intelligent study plan optimization
+- **GET /recommendations/insights**: Academic performance insights
+
+All endpoints include proper error handling, validation, and security middleware.
