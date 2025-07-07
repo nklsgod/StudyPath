@@ -8,6 +8,7 @@ import authRoutes from './routes/auth';
 import moduleRoutes from './routes/modules';
 import studyPlanRoutes from './routes/studyPlans';
 import recommendationRoutes from './routes/recommendations';
+import prerequisiteRoutes from './routes/prerequisites';
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -44,6 +45,7 @@ app.use('/auth', authRoutes);
 app.use('/modules', moduleRoutes);
 app.use('/study-plans', studyPlanRoutes);
 app.use('/recommendations', recommendationRoutes);
+app.use('/prerequisites', prerequisiteRoutes);
 
 app.get('/', (req, res) => {
   res.json({
