@@ -4,6 +4,7 @@ import { modulePrerequisites, modules, userModules } from '../db/schema';
 import { eq, and } from 'drizzle-orm';
 import { authenticateToken } from '../middleware/auth';
 import { validateRequest } from '../middleware/validation';
+import { getSuggestedEnrollmentOrder } from '../services/prerequisitesService';
 import Joi from 'joi';
 
 const router = Router();
@@ -369,6 +370,37 @@ router.delete('/:id', authenticateToken, async (req, res) => {
     });
   } catch (error) {
     console.error('Delete prerequisite error:', error);
+    res.status(500).json({
+      success: false,
+      error: {
+        message: 'Internal server error',
+      },
+    });
+  }
+});
+
+// POST /prerequisites/suggest-order - Get suggested enrollment order for modules
+router.post('/suggest-order', validateRequest({
+  body: Joi.object({
+    modulePools: Joi.array().items(Joi.string()).min(1).required(),
+  }),
+}), async (req, res) => {
+  try {
+    const { modulePools } = req.body;
+
+    // Note: In production, validate that all modules exist first
+
+    const suggestions = await getSuggestedEnrollmentOrder(modulePools);
+
+    res.json({
+      success: true,
+      data: {
+        suggestions,
+        totalModules: modulePools.length,
+      },
+    });
+  } catch (error) {
+    console.error('Get enrollment suggestions error:', error);
     res.status(500).json({
       success: false,
       error: {

@@ -4,6 +4,7 @@ import { modules, userModules, users } from '../db/schema';
 import { eq, like, and, or } from 'drizzle-orm';
 import { authenticateToken, optionalAuth } from '../middleware/auth';
 import { validateRequest } from '../middleware/validation';
+import { validatePrerequisites } from '../services/prerequisitesService';
 import Joi from 'joi';
 
 const router = Router();
@@ -18,6 +19,9 @@ const createUserModuleSchema = {
     grade: Joi.number().min(1.0).max(5.0).optional(),
     semester: Joi.string().optional(),
     notes: Joi.string().max(1000).optional(),
+  }),
+  query: Joi.object({
+    skipPrerequisiteCheck: Joi.boolean().default(false),
   }),
 };
 
@@ -208,6 +212,33 @@ router.post(
         return;
       }
 
+      // Check prerequisites unless explicitly skipped
+      const { skipPrerequisiteCheck = false } = req.query;
+      let prerequisiteValidation = null;
+
+      if (!skipPrerequisiteCheck && status !== 'COMPLETED') {
+        try {
+          prerequisiteValidation = await validatePrerequisites(userId, pool);
+          
+          if (!prerequisiteValidation.canEnroll) {
+            res.status(422).json({
+              success: false,
+              error: {
+                message: 'Cannot enroll due to unmet prerequisites',
+                details: {
+                  validation: prerequisiteValidation,
+                  hint: 'Complete required prerequisites first, or use ?skipPrerequisiteCheck=true to override',
+                },
+              },
+            });
+            return;
+          }
+        } catch (error) {
+          console.error('Prerequisite validation error:', error);
+          // Continue with enrollment if validation fails (fallback behavior)
+        }
+      }
+
       // Create user module enrollment
       const newUserModule = await db
         .insert(userModules)
@@ -227,6 +258,7 @@ router.post(
         data: {
           userModule: newUserModule[0],
           module: module[0],
+          prerequisiteValidation,
         },
       });
     } catch (error) {
