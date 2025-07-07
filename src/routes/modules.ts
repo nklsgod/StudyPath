@@ -12,20 +12,24 @@ const router = Router();
 const createUserModuleSchema = {
   body: Joi.object({
     modulePool: Joi.string().required(),
-    status: Joi.string().valid('PLANNED', 'IN_PROGRESS', 'COMPLETED', 'FAILED', 'CANCELLED').default('PLANNED'),
+    status: Joi.string()
+      .valid('PLANNED', 'IN_PROGRESS', 'COMPLETED', 'FAILED', 'CANCELLED')
+      .default('PLANNED'),
     grade: Joi.number().min(1.0).max(5.0).optional(),
     semester: Joi.string().optional(),
-    notes: Joi.string().max(1000).optional()
-  })
+    notes: Joi.string().max(1000).optional(),
+  }),
 };
 
 const updateUserModuleSchema = {
   body: Joi.object({
-    status: Joi.string().valid('PLANNED', 'IN_PROGRESS', 'COMPLETED', 'FAILED', 'CANCELLED').optional(),
+    status: Joi.string()
+      .valid('PLANNED', 'IN_PROGRESS', 'COMPLETED', 'FAILED', 'CANCELLED')
+      .optional(),
     grade: Joi.number().min(1.0).max(5.0).optional(),
     semester: Joi.string().optional(),
-    notes: Joi.string().max(1000).optional()
-  })
+    notes: Joi.string().max(1000).optional(),
+  }),
 };
 
 // GET /modules - Get all THM modules with optional filtering
@@ -35,7 +39,7 @@ router.get('/', optionalAuth, async (req, res) => {
 
     // Build base query
     let baseQuery = db.select().from(modules);
-    
+
     // Build where conditions
     const whereConditions = [];
 
@@ -58,9 +62,10 @@ router.get('/', optionalAuth, async (req, res) => {
     }
 
     // Apply where conditions if any
-    let query = whereConditions.length > 0 
-      ? baseQuery.where(and(...whereConditions))
-      : baseQuery;
+    let query =
+      whereConditions.length > 0
+        ? baseQuery.where(and(...whereConditions))
+        : baseQuery;
 
     // Add pagination
     const limitNum = Math.min(parseInt(limit as string) || 50, 100);
@@ -78,17 +83,17 @@ router.get('/', optionalAuth, async (req, res) => {
         pagination: {
           limit: limitNum,
           offset: offsetNum,
-          total: result.length
-        }
-      }
+          total: result.length,
+        },
+      },
     });
   } catch (error) {
     console.error('Get modules error:', error);
     res.status(500).json({
       success: false,
       error: {
-        message: 'Internal server error'
-      }
+        message: 'Internal server error',
+      },
     });
   }
 });
@@ -108,8 +113,8 @@ router.get('/:pool', optionalAuth, async (req, res) => {
       res.status(404).json({
         success: false,
         error: {
-          message: 'Module not found'
-        }
+          message: 'Module not found',
+        },
       });
       return;
     }
@@ -117,16 +122,16 @@ router.get('/:pool', optionalAuth, async (req, res) => {
     res.json({
       success: true,
       data: {
-        module: module[0]
-      }
+        module: module[0],
+      },
     });
   } catch (error) {
     console.error('Get module error:', error);
     res.status(500).json({
       success: false,
       error: {
-        message: 'Internal server error'
-      }
+        message: 'Internal server error',
+      },
     });
   }
 });
@@ -142,159 +147,166 @@ router.get('/meta/categories', async (req, res) => {
     res.json({
       success: true,
       data: {
-        categories: categories.map(c => c.category)
-      }
+        categories: categories.map((c) => c.category),
+      },
     });
   } catch (error) {
     console.error('Get categories error:', error);
     res.status(500).json({
       success: false,
       error: {
-        message: 'Internal server error'
-      }
+        message: 'Internal server error',
+      },
     });
   }
 });
 
 // POST /modules/:pool/enroll - Enroll user in a module
-router.post('/:pool/enroll', authenticateToken, validateRequest(createUserModuleSchema), async (req, res) => {
-  try {
-    const { pool } = req.params;
-    const { status = 'PLANNED', grade, semester, notes } = req.body;
-    const userId = req.user!.id;
+router.post(
+  '/:pool/enroll',
+  authenticateToken,
+  validateRequest(createUserModuleSchema),
+  async (req, res) => {
+    try {
+      const { pool } = req.params;
+      const { status = 'PLANNED', grade, semester, notes } = req.body;
+      const userId = req.user!.id;
 
-    // Check if module exists
-    const module = await db
-      .select()
-      .from(modules)
-      .where(eq(modules.pool, pool))
-      .limit(1);
+      // Check if module exists
+      const module = await db
+        .select()
+        .from(modules)
+        .where(eq(modules.pool, pool))
+        .limit(1);
 
-    if (module.length === 0) {
-      res.status(404).json({
+      if (module.length === 0) {
+        res.status(404).json({
+          success: false,
+          error: {
+            message: 'Module not found',
+          },
+        });
+        return;
+      }
+
+      // Check if user is already enrolled
+      const existingEnrollment = await db
+        .select()
+        .from(userModules)
+        .where(
+          and(eq(userModules.userId, userId), eq(userModules.modulePool, pool))
+        )
+        .limit(1);
+
+      if (existingEnrollment.length > 0) {
+        res.status(409).json({
+          success: false,
+          error: {
+            message: 'User is already enrolled in this module',
+          },
+        });
+        return;
+      }
+
+      // Create user module enrollment
+      const newUserModule = await db
+        .insert(userModules)
+        .values({
+          userId,
+          modulePool: pool,
+          status,
+          grade,
+          semester,
+          notes,
+          completedAt: status === 'COMPLETED' ? new Date() : null,
+        })
+        .returning();
+
+      res.status(201).json({
+        success: true,
+        data: {
+          userModule: newUserModule[0],
+          module: module[0],
+        },
+      });
+    } catch (error) {
+      console.error('Enroll module error:', error);
+      res.status(500).json({
         success: false,
         error: {
-          message: 'Module not found'
-        }
+          message: 'Internal server error',
+        },
       });
-      return;
     }
-
-    // Check if user is already enrolled
-    const existingEnrollment = await db
-      .select()
-      .from(userModules)
-      .where(and(
-        eq(userModules.userId, userId),
-        eq(userModules.modulePool, pool)
-      ))
-      .limit(1);
-
-    if (existingEnrollment.length > 0) {
-      res.status(409).json({
-        success: false,
-        error: {
-          message: 'User is already enrolled in this module'
-        }
-      });
-      return;
-    }
-
-    // Create user module enrollment
-    const newUserModule = await db
-      .insert(userModules)
-      .values({
-        userId,
-        modulePool: pool,
-        status,
-        grade,
-        semester,
-        notes,
-        completedAt: status === 'COMPLETED' ? new Date() : null
-      })
-      .returning();
-
-    res.status(201).json({
-      success: true,
-      data: {
-        userModule: newUserModule[0],
-        module: module[0]
-      }
-    });
-  } catch (error) {
-    console.error('Enroll module error:', error);
-    res.status(500).json({
-      success: false,
-      error: {
-        message: 'Internal server error'
-      }
-    });
   }
-});
+);
 
 // PUT /modules/:pool/progress - Update user's module progress
-router.put('/:pool/progress', authenticateToken, validateRequest(updateUserModuleSchema), async (req, res) => {
-  try {
-    const { pool } = req.params;
-    const userId = req.user!.id;
-    const updateData = req.body;
+router.put(
+  '/:pool/progress',
+  authenticateToken,
+  validateRequest(updateUserModuleSchema),
+  async (req, res) => {
+    try {
+      const { pool } = req.params;
+      const userId = req.user!.id;
+      const updateData = req.body;
 
-    // Check if user is enrolled in module
-    const userModule = await db
-      .select()
-      .from(userModules)
-      .where(and(
-        eq(userModules.userId, userId),
-        eq(userModules.modulePool, pool)
-      ))
-      .limit(1);
+      // Check if user is enrolled in module
+      const userModule = await db
+        .select()
+        .from(userModules)
+        .where(
+          and(eq(userModules.userId, userId), eq(userModules.modulePool, pool))
+        )
+        .limit(1);
 
-    if (userModule.length === 0) {
-      res.status(404).json({
+      if (userModule.length === 0) {
+        res.status(404).json({
+          success: false,
+          error: {
+            message: 'User is not enrolled in this module',
+          },
+        });
+        return;
+      }
+
+      // Update completion date if status is completed
+      if (updateData.status === 'COMPLETED') {
+        updateData.completedAt = new Date();
+      } else if (updateData.status && updateData.status !== 'COMPLETED') {
+        updateData.completedAt = null;
+      }
+
+      // Update user module
+      const updatedUserModule = await db
+        .update(userModules)
+        .set({
+          ...updateData,
+          updatedAt: new Date(),
+        })
+        .where(
+          and(eq(userModules.userId, userId), eq(userModules.modulePool, pool))
+        )
+        .returning();
+
+      res.json({
+        success: true,
+        data: {
+          userModule: updatedUserModule[0],
+        },
+      });
+    } catch (error) {
+      console.error('Update module progress error:', error);
+      res.status(500).json({
         success: false,
         error: {
-          message: 'User is not enrolled in this module'
-        }
+          message: 'Internal server error',
+        },
       });
-      return;
     }
-
-    // Update completion date if status is completed
-    if (updateData.status === 'COMPLETED') {
-      updateData.completedAt = new Date();
-    } else if (updateData.status && updateData.status !== 'COMPLETED') {
-      updateData.completedAt = null;
-    }
-
-    // Update user module
-    const updatedUserModule = await db
-      .update(userModules)
-      .set({
-        ...updateData,
-        updatedAt: new Date()
-      })
-      .where(and(
-        eq(userModules.userId, userId),
-        eq(userModules.modulePool, pool)
-      ))
-      .returning();
-
-    res.json({
-      success: true,
-      data: {
-        userModule: updatedUserModule[0]
-      }
-    });
-  } catch (error) {
-    console.error('Update module progress error:', error);
-    res.status(500).json({
-      success: false,
-      error: {
-        message: 'Internal server error'
-      }
-    });
   }
-});
+);
 
 // DELETE /modules/:pool/unenroll - Unenroll user from module
 router.delete('/:pool/unenroll', authenticateToken, async (req, res) => {
@@ -304,18 +316,17 @@ router.delete('/:pool/unenroll', authenticateToken, async (req, res) => {
 
     const deletedUserModule = await db
       .delete(userModules)
-      .where(and(
-        eq(userModules.userId, userId),
-        eq(userModules.modulePool, pool)
-      ))
+      .where(
+        and(eq(userModules.userId, userId), eq(userModules.modulePool, pool))
+      )
       .returning();
 
     if (deletedUserModule.length === 0) {
       res.status(404).json({
         success: false,
         error: {
-          message: 'User is not enrolled in this module'
-        }
+          message: 'User is not enrolled in this module',
+        },
       });
       return;
     }
@@ -323,16 +334,16 @@ router.delete('/:pool/unenroll', authenticateToken, async (req, res) => {
     res.json({
       success: true,
       data: {
-        message: 'Successfully unenrolled from module'
-      }
+        message: 'Successfully unenrolled from module',
+      },
     });
   } catch (error) {
     console.error('Unenroll module error:', error);
     res.status(500).json({
       success: false,
       error: {
-        message: 'Internal server error'
-      }
+        message: 'Internal server error',
+      },
     });
   }
 });
@@ -345,7 +356,7 @@ router.get('/my/enrolled', authenticateToken, async (req, res) => {
 
     // Build where conditions
     const whereConditions = [eq(userModules.userId, userId)];
-    
+
     if (status && typeof status === 'string') {
       whereConditions.push(eq(userModules.status, status as any));
     }
@@ -353,7 +364,7 @@ router.get('/my/enrolled', authenticateToken, async (req, res) => {
     const result = await db
       .select({
         userModule: userModules,
-        module: modules
+        module: modules,
       })
       .from(userModules)
       .innerJoin(modules, eq(userModules.modulePool, modules.pool))
@@ -363,18 +374,18 @@ router.get('/my/enrolled', authenticateToken, async (req, res) => {
     res.json({
       success: true,
       data: {
-        enrollments: result
-      }
+        enrollments: result,
+      },
     });
   } catch (error) {
     console.error('Get user modules error:', error);
     res.status(500).json({
       success: false,
       error: {
-        message: 'Internal server error'
-      }
+        message: 'Internal server error',
+      },
     });
   }
 });
 
-export default router; 
+export default router;

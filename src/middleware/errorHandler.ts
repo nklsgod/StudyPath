@@ -22,9 +22,12 @@ export const globalErrorHandler = (
   res.status(statusCode).json({
     success: false,
     error: {
-      message: process.env.NODE_ENV === 'production' ? 'Something went wrong!' : message,
-      ...(process.env.NODE_ENV !== 'production' && { stack: error.stack })
-    }
+      message:
+        process.env.NODE_ENV === 'production'
+          ? 'Something went wrong!'
+          : message,
+      ...(process.env.NODE_ENV !== 'production' && { stack: error.stack }),
+    },
   });
 };
 
@@ -32,7 +35,7 @@ export const notFoundHandler = (req: Request, res: Response) => {
   res.status(404).json({
     success: false,
     error: {
-      message: `Route ${req.originalUrl} not found`
-    }
+      message: `Route ${req.originalUrl} not found`,
+    },
   });
 };

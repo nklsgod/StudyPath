@@ -12,7 +12,9 @@ const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   max: parseInt(process.env.DB_MAX_CONNECTIONS || '20'),
   idleTimeoutMillis: parseInt(process.env.DB_IDLE_TIMEOUT || '30000'),
-  connectionTimeoutMillis: parseInt(process.env.DB_CONNECTION_TIMEOUT || '2000'),
+  connectionTimeoutMillis: parseInt(
+    process.env.DB_CONNECTION_TIMEOUT || '2000'
+  ),
 });
 
 // Handle pool errors
@@ -21,12 +23,13 @@ pool.on('error', (err) => {
 });
 
 // Test connection on startup
-pool.connect()
-  .then(client => {
+pool
+  .connect()
+  .then((client) => {
     console.log('Database connected successfully');
     client.release();
   })
-  .catch(err => {
+  .catch((err) => {
     console.error('Database connection failed:', err);
     process.exit(1);
   });

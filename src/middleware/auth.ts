@@ -61,8 +61,8 @@ export const authenticateToken = async (
       res.status(401).json({
         success: false,
         error: {
-          message: 'Access token is required'
-        }
+          message: 'Access token is required',
+        },
       });
       return;
     }
@@ -74,7 +74,7 @@ export const authenticateToken = async (
       .select({
         id: users.id,
         email: users.email,
-        name: users.name
+        name: users.name,
       })
       .from(users)
       .where(eq(users.id, decoded.userId))
@@ -84,8 +84,8 @@ export const authenticateToken = async (
       res.status(401).json({
         success: false,
         error: {
-          message: 'User not found'
-        }
+          message: 'User not found',
+        },
       });
       return;
     }
@@ -98,8 +98,8 @@ export const authenticateToken = async (
       res.status(401).json({
         success: false,
         error: {
-          message: 'Invalid token'
-        }
+          message: 'Invalid token',
+        },
       });
       return;
     }
@@ -108,8 +108,8 @@ export const authenticateToken = async (
       res.status(401).json({
         success: false,
         error: {
-          message: 'Token expired'
-        }
+          message: 'Token expired',
+        },
       });
       return;
     }
@@ -117,8 +117,8 @@ export const authenticateToken = async (
     res.status(500).json({
       success: false,
       error: {
-        message: 'Authentication error'
-      }
+        message: 'Authentication error',
+      },
     });
   }
 };
@@ -145,7 +145,7 @@ export const optionalAuth = async (
       .select({
         id: users.id,
         email: users.email,
-        name: users.name
+        name: users.name,
       })
       .from(users)
       .where(eq(users.id, decoded.userId))

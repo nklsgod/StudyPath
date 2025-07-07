@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import bcrypt from 'bcryptjs';
 import { db } from '../db';
-import { users } from '../db/schema';
+import { users, userModules, studyPlans } from '../db/schema';
 import { eq } from 'drizzle-orm';
 import { generateToken, authenticateToken } from '../middleware/auth';
 import { validateRequest } from '../middleware/validation';
@@ -14,15 +14,15 @@ const registerSchema = {
   body: Joi.object({
     email: Joi.string().email().required(),
     password: Joi.string().min(6).required(),
-    name: Joi.string().min(2).max(100).required()
-  })
+    name: Joi.string().min(2).max(100).required(),
+  }),
 };
 
 const loginSchema = {
   body: Joi.object({
     email: Joi.string().email().required(),
-    password: Joi.string().required()
-  })
+    password: Joi.string().required(),
+  }),
 };
 
 // POST /auth/register
@@ -41,8 +41,8 @@ router.post('/register', validateRequest(registerSchema), async (req, res) => {
       res.status(409).json({
         success: false,
         error: {
-          message: 'User with this email already exists'
-        }
+          message: 'User with this email already exists',
+        },
       });
       return;
     }
@@ -57,13 +57,13 @@ router.post('/register', validateRequest(registerSchema), async (req, res) => {
       .values({
         email,
         passwordHash,
-        name
+        name,
       })
       .returning({
         id: users.id,
         email: users.email,
         name: users.name,
-        createdAt: users.createdAt
+        createdAt: users.createdAt,
       });
 
     // Generate JWT token
@@ -73,16 +73,16 @@ router.post('/register', validateRequest(registerSchema), async (req, res) => {
       success: true,
       data: {
         user: newUser[0],
-        token
-      }
+        token,
+      },
     });
   } catch (error) {
     console.error('Registration error:', error);
     res.status(500).json({
       success: false,
       error: {
-        message: 'Internal server error during registration'
-      }
+        message: 'Internal server error during registration',
+      },
     });
   }
 });
@@ -103,21 +103,24 @@ router.post('/login', validateRequest(loginSchema), async (req, res) => {
       res.status(401).json({
         success: false,
         error: {
-          message: 'Invalid email or password'
-        }
+          message: 'Invalid email or password',
+        },
       });
       return;
     }
 
     // Verify password
-    const isValidPassword = await bcrypt.compare(password, user[0].passwordHash);
+    const isValidPassword = await bcrypt.compare(
+      password,
+      user[0].passwordHash
+    );
 
     if (!isValidPassword) {
       res.status(401).json({
         success: false,
         error: {
-          message: 'Invalid email or password'
-        }
+          message: 'Invalid email or password',
+        },
       });
       return;
     }
@@ -132,18 +135,18 @@ router.post('/login', validateRequest(loginSchema), async (req, res) => {
           id: user[0].id,
           email: user[0].email,
           name: user[0].name,
-          createdAt: user[0].createdAt
+          createdAt: user[0].createdAt,
         },
-        token
-      }
+        token,
+      },
     });
   } catch (error) {
     console.error('Login error:', error);
     res.status(500).json({
       success: false,
       error: {
-        message: 'Internal server error during login'
-      }
+        message: 'Internal server error during login',
+      },
     });
   }
 });
@@ -156,8 +159,8 @@ router.get('/me', authenticateToken, async (req, res) => {
       res.status(401).json({
         success: false,
         error: {
-          message: 'Authentication required'
-        }
+          message: 'Authentication required',
+        },
       });
       return;
     }
@@ -165,16 +168,16 @@ router.get('/me', authenticateToken, async (req, res) => {
     res.json({
       success: true,
       data: {
-        user: req.user
-      }
+        user: req.user,
+      },
     });
   } catch (error) {
     console.error('Get user error:', error);
     res.status(500).json({
       success: false,
       error: {
-        message: 'Internal server error'
-      }
+        message: 'Internal server error',
+      },
     });
   }
 });
@@ -186,8 +189,8 @@ router.post('/refresh', authenticateToken, async (req, res) => {
       res.status(401).json({
         success: false,
         error: {
-          message: 'Authentication required'
-        }
+          message: 'Authentication required',
+        },
       });
       return;
     }
@@ -198,15 +201,73 @@ router.post('/refresh', authenticateToken, async (req, res) => {
     res.json({
       success: true,
       data: {
-        token
-      }
+        token,
+      },
     });
   } catch (error) {
     console.error('Token refresh error:', error);
     res.status(500).json({
       success: false,
       error: {
-        message: 'Internal server error during token refresh'
+        message: 'Internal server error during token refresh',
+      },
+    });
+  }
+});
+
+// GET /auth/stats - Get user progress statistics
+router.get('/stats', authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user!.id;
+
+    // Get user module statistics
+    const userModuleStats = await db
+      .select()
+      .from(userModules)
+      .where(eq(userModules.userId, userId));
+
+    // Get user study plan count
+    const userStudyPlanCount = await db
+      .select()
+      .from(studyPlans)
+      .where(eq(studyPlans.userId, userId));
+
+    // Calculate statistics
+    const completedModules = userModuleStats.filter(um => um.status === 'COMPLETED');
+    const inProgressModules = userModuleStats.filter(um => um.status === 'IN_PROGRESS');
+    const plannedModules = userModuleStats.filter(um => um.status === 'PLANNED');
+
+    // Calculate average grade
+    const gradesWithValues = completedModules
+      .filter(um => um.grade !== null)
+      .map(um => um.grade!);
+    
+    const averageGrade = gradesWithValues.length > 0 
+      ? gradesWithValues.reduce((sum, grade) => sum + grade, 0) / gradesWithValues.length 
+      : null;
+
+    res.json({
+      success: true,
+      data: {
+        modules: {
+          total: userModuleStats.length,
+          completed: completedModules.length,
+          inProgress: inProgressModules.length,
+          planned: plannedModules.length,
+          averageGrade: averageGrade ? Math.round(averageGrade * 10) / 10 : null
+        },
+        studyPlans: {
+          total: userStudyPlanCount.length
+        },
+        user: req.user
+      }
+    });
+  } catch (error) {
+    console.error('Get user stats error:', error);
+    res.status(500).json({
+      success: false,
+      error: {
+        message: 'Internal server error'
       }
     });
   }

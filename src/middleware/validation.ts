@@ -13,7 +13,9 @@ export const validateRequest = (schema: {
     if (schema.body) {
       const { error } = schema.body.validate(req.body);
       if (error) {
-        validationErrors.push(`Body: ${error.details.map(d => d.message).join(', ')}`);
+        validationErrors.push(
+          `Body: ${error.details.map((d) => d.message).join(', ')}`
+        );
       }
     }
 
@@ -21,7 +23,9 @@ export const validateRequest = (schema: {
     if (schema.query) {
       const { error } = schema.query.validate(req.query);
       if (error) {
-        validationErrors.push(`Query: ${error.details.map(d => d.message).join(', ')}`);
+        validationErrors.push(
+          `Query: ${error.details.map((d) => d.message).join(', ')}`
+        );
       }
     }
 
@@ -29,7 +33,9 @@ export const validateRequest = (schema: {
     if (schema.params) {
       const { error } = schema.params.validate(req.params);
       if (error) {
-        validationErrors.push(`Params: ${error.details.map(d => d.message).join(', ')}`);
+        validationErrors.push(
+          `Params: ${error.details.map((d) => d.message).join(', ')}`
+        );
       }
     }
 
@@ -38,8 +44,8 @@ export const validateRequest = (schema: {
         success: false,
         error: {
           message: 'Validation failed',
-          details: validationErrors
-        }
+          details: validationErrors,
+        },
       });
       return;
     }

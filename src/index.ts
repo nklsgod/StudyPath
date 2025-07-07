@@ -46,7 +46,7 @@ app.use('/study-plans', studyPlanRoutes);
 app.use('/recommendations', recommendationRoutes);
 
 app.get('/', (req, res) => {
-  res.json({ 
+  res.json({
     message: 'StudyPath API is running!',
     version: '1.0.0',
     description: 'THM DMS Studienplaner mit KI Unterstützung',
@@ -55,7 +55,7 @@ app.get('/', (req, res) => {
         'POST /auth/register': 'Register new user',
         'POST /auth/login': 'Login user',
         'GET /auth/me': 'Get current user info',
-        'POST /auth/refresh': 'Refresh JWT token'
+        'POST /auth/refresh': 'Refresh JWT token',
       },
       modules: {
         'GET /modules': 'Get all THM modules with filtering',
@@ -64,7 +64,7 @@ app.get('/', (req, res) => {
         'POST /modules/:pool/enroll': 'Enroll in module',
         'PUT /modules/:pool/progress': 'Update module progress',
         'DELETE /modules/:pool/unenroll': 'Unenroll from module',
-        'GET /modules/my/enrolled': 'Get user enrolled modules'
+        'GET /modules/my/enrolled': 'Get user enrolled modules',
       },
       studyPlans: {
         'GET /study-plans': 'Get all user study plans',
@@ -74,18 +74,27 @@ app.get('/', (req, res) => {
         'DELETE /study-plans/:id': 'Delete study plan',
         'POST /study-plans/:id/modules': 'Add module to study plan',
         'PUT /study-plans/:id/modules/:pool': 'Update module in study plan',
-        'DELETE /study-plans/:id/modules/:pool': 'Remove module from study plan',
-        'GET /study-plans/:id/summary': 'Get study plan statistics'
+        'DELETE /study-plans/:id/modules/:pool':
+          'Remove module from study plan',
+        'GET /study-plans/:id/summary': 'Get study plan statistics',
       },
       recommendations: {
-        'GET /recommendations/modules': 'AI-powered personalized module recommendations',
-        'POST /recommendations/study-plan': 'Optimize study plan with AI algorithms',
-        'GET /recommendations/insights': 'Get intelligent study insights and analytics'
-      }
+        'GET /recommendations/modules':
+          'AI-powered personalized module recommendations',
+        'POST /recommendations/study-plan':
+          'Optimize study plan with AI algorithms',
+        'GET /recommendations/insights':
+          'Get intelligent study insights and analytics',
+      },
     },
     database: {
       moduleCount: '96 THM modules available',
-      pools: ['Orientierungsphase', 'IT Vertiefung', 'Überfachlicher Pool', 'Wahlpflichtpool']
+      pools: [
+        'Orientierungsphase',
+        'IT Vertiefung',
+        'Überfachlicher Pool',
+        'Wahlpflichtpool',
+      ],
     },
     ai: {
       features: [
@@ -93,15 +102,15 @@ app.get('/', (req, res) => {
         'Intelligent study plan optimization with semester distribution',
         'Academic performance insights and early warning system',
         'Workload balancing and difficulty assessment',
-        'Smart prerequisite detection and semester planning'
+        'Smart prerequisite detection and semester planning',
       ],
       algorithms: [
         'Multi-factor scoring for module recommendations',
         'Bin-packing optimization for semester distribution',
         'Performance-based difficulty matching',
-        'Category expertise analysis'
-      ]
-    }
+        'Category expertise analysis',
+      ],
+    },
   });
 });
 
