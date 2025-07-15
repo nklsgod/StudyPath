@@ -40,7 +40,7 @@ module.exports = [
       'prettier/prettier': 'error',
       '@typescript-eslint/no-unused-vars': 'error',
       '@typescript-eslint/explicit-function-return-type': 'warn',
-      '@typescript-eslint/no-namespace': ['error', { allowDeclarationMerging: true }],
+      '@typescript-eslint/no-namespace': ['error', { allowDeclarations: true }],
     },
   },
 ];

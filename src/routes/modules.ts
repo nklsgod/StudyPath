@@ -390,7 +390,17 @@ router.get('/my/enrolled', authenticateToken, async (req, res) => {
     const whereConditions = [eq(userModules.userId, userId)];
 
     if (status && typeof status === 'string') {
-      whereConditions.push(eq(userModules.status, status as 'PLANNED' | 'IN_PROGRESS' | 'COMPLETED' | 'FAILED' | 'CANCELLED'));
+      whereConditions.push(
+        eq(
+          userModules.status,
+          status as
+            | 'PLANNED'
+            | 'IN_PROGRESS'
+            | 'COMPLETED'
+            | 'FAILED'
+            | 'CANCELLED'
+        )
+      );
     }
 
     const result = await db
