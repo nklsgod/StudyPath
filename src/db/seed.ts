@@ -780,7 +780,7 @@ const thmModules = [
   },
 ];
 
-async function seed() {
+async function seed(): Promise<void> {
   console.log('Start seeding...');
 
   try {

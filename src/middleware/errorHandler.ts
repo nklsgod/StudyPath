@@ -9,8 +9,8 @@ export const globalErrorHandler = (
   error: AppError,
   req: Request,
   res: Response,
-  next: NextFunction
-) => {
+  _next: NextFunction
+): void => {
   const statusCode = error.statusCode || 500;
   const message = error.message || 'Internal Server Error';
 
@@ -31,7 +31,7 @@ export const globalErrorHandler = (
   });
 };
 
-export const notFoundHandler = (req: Request, res: Response) => {
+export const notFoundHandler = (req: Request, res: Response): void => {
   res.status(404).json({
     success: false,
     error: {

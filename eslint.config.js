@@ -7,6 +7,9 @@ const prettierConfig = require('eslint-config-prettier');
 module.exports = [
   js.configs.recommended,
   {
+    ignores: ['eslint.config.js', 'node_modules/**', 'dist/**'],
+  },
+  {
     files: ['**/*.ts'],
     languageOptions: {
       parser: tsparser,
@@ -37,6 +40,7 @@ module.exports = [
       'prettier/prettier': 'error',
       '@typescript-eslint/no-unused-vars': 'error',
       '@typescript-eslint/explicit-function-return-type': 'warn',
+      '@typescript-eslint/no-namespace': ['error', { allowDeclarationMerging: true }],
     },
   },
 ];

@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { db } from '../db';
-import { modules, userModules, users } from '../db/schema';
+import { modules, userModules } from '../db/schema';
 import { eq, like, and, or } from 'drizzle-orm';
 import { authenticateToken, optionalAuth } from '../middleware/auth';
 import { validateRequest } from '../middleware/validation';
@@ -390,7 +390,7 @@ router.get('/my/enrolled', authenticateToken, async (req, res) => {
     const whereConditions = [eq(userModules.userId, userId)];
 
     if (status && typeof status === 'string') {
-      whereConditions.push(eq(userModules.status, status as any));
+      whereConditions.push(eq(userModules.status, status as 'PLANNED' | 'IN_PROGRESS' | 'COMPLETED' | 'FAILED' | 'CANCELLED'));
     }
 
     const result = await db
