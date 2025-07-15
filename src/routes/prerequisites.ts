@@ -161,7 +161,9 @@ router.get('/:modulePool/status', authenticateToken, async (req, res) => {
     // Check prerequisite fulfillment
     const prerequisiteStatus = prerequisites.map((prereq) => ({
       ...prereq,
-      isFulfilled: completedPools.includes(prereq.prerequisite.prerequisitePool),
+      isFulfilled: completedPools.includes(
+        prereq.prerequisite.prerequisitePool
+      ),
     }));
 
     const requiredPrerequisites = prerequisiteStatus.filter(
@@ -204,8 +206,12 @@ router.post(
   validateRequest(createPrerequisiteSchema),
   async (req, res) => {
     try {
-      const { modulePool, prerequisitePool, isRequired = true, description } =
-        req.body;
+      const {
+        modulePool,
+        prerequisitePool,
+        isRequired = true,
+        description,
+      } = req.body;
 
       // Verify both modules exist
       const [module, prerequisiteModule] = await Promise.all([
@@ -380,34 +386,38 @@ router.delete('/:id', authenticateToken, async (req, res) => {
 });
 
 // POST /prerequisites/suggest-order - Get suggested enrollment order for modules
-router.post('/suggest-order', validateRequest({
-  body: Joi.object({
-    modulePools: Joi.array().items(Joi.string()).min(1).required(),
+router.post(
+  '/suggest-order',
+  validateRequest({
+    body: Joi.object({
+      modulePools: Joi.array().items(Joi.string()).min(1).required(),
+    }),
   }),
-}), async (req, res) => {
-  try {
-    const { modulePools } = req.body;
+  async (req, res) => {
+    try {
+      const { modulePools } = req.body;
 
-    // Note: In production, validate that all modules exist first
+      // Note: In production, validate that all modules exist first
 
-    const suggestions = await getSuggestedEnrollmentOrder(modulePools);
+      const suggestions = await getSuggestedEnrollmentOrder(modulePools);
 
-    res.json({
-      success: true,
-      data: {
-        suggestions,
-        totalModules: modulePools.length,
-      },
-    });
-  } catch (error) {
-    console.error('Get enrollment suggestions error:', error);
-    res.status(500).json({
-      success: false,
-      error: {
-        message: 'Internal server error',
-      },
-    });
+      res.json({
+        success: true,
+        data: {
+          suggestions,
+          totalModules: modulePools.length,
+        },
+      });
+    } catch (error) {
+      console.error('Get enrollment suggestions error:', error);
+      res.status(500).json({
+        success: false,
+        error: {
+          message: 'Internal server error',
+        },
+      });
+    }
   }
-});
+);
 
 export default router;

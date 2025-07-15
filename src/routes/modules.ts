@@ -219,7 +219,7 @@ router.post(
       if (!skipPrerequisiteCheck && status !== 'COMPLETED') {
         try {
           prerequisiteValidation = await validatePrerequisites(userId, pool);
-          
+
           if (!prerequisiteValidation.canEnroll) {
             res.status(422).json({
               success: false,

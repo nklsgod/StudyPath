@@ -147,10 +147,7 @@ export async function getPrerequisiteChain(
       prerequisiteModule: modules,
     })
     .from(modulePrerequisites)
-    .innerJoin(
-      modules,
-      eq(modulePrerequisites.prerequisitePool, modules.pool)
-    )
+    .innerJoin(modules, eq(modulePrerequisites.prerequisitePool, modules.pool))
     .where(eq(modulePrerequisites.modulePool, modulePool));
 
   const chain: PrerequisiteChain = {
@@ -254,7 +251,9 @@ export async function getSuggestedEnrollmentOrder(
 
     for (const { modulePool, chain } of canAssignNow) {
       orderMap.set(modulePool, currentOrder);
-      const prereqCount = chain.prerequisites.filter((p) => p.isRequired).length;
+      const prereqCount = chain.prerequisites.filter(
+        (p) => p.isRequired
+      ).length;
       result.push({
         modulePool,
         order: currentOrder,

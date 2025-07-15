@@ -233,18 +233,26 @@ router.get('/stats', authenticateToken, async (req, res) => {
       .where(eq(studyPlans.userId, userId));
 
     // Calculate statistics
-    const completedModules = userModuleStats.filter(um => um.status === 'COMPLETED');
-    const inProgressModules = userModuleStats.filter(um => um.status === 'IN_PROGRESS');
-    const plannedModules = userModuleStats.filter(um => um.status === 'PLANNED');
+    const completedModules = userModuleStats.filter(
+      (um) => um.status === 'COMPLETED'
+    );
+    const inProgressModules = userModuleStats.filter(
+      (um) => um.status === 'IN_PROGRESS'
+    );
+    const plannedModules = userModuleStats.filter(
+      (um) => um.status === 'PLANNED'
+    );
 
     // Calculate average grade
     const gradesWithValues = completedModules
-      .filter(um => um.grade !== null)
-      .map(um => um.grade!);
-    
-    const averageGrade = gradesWithValues.length > 0 
-      ? gradesWithValues.reduce((sum, grade) => sum + grade, 0) / gradesWithValues.length 
-      : null;
+      .filter((um) => um.grade !== null)
+      .map((um) => um.grade!);
+
+    const averageGrade =
+      gradesWithValues.length > 0
+        ? gradesWithValues.reduce((sum, grade) => sum + grade, 0) /
+          gradesWithValues.length
+        : null;
 
     res.json({
       success: true,
@@ -254,21 +262,23 @@ router.get('/stats', authenticateToken, async (req, res) => {
           completed: completedModules.length,
           inProgress: inProgressModules.length,
           planned: plannedModules.length,
-          averageGrade: averageGrade ? Math.round(averageGrade * 10) / 10 : null
+          averageGrade: averageGrade
+            ? Math.round(averageGrade * 10) / 10
+            : null,
         },
         studyPlans: {
-          total: userStudyPlanCount.length
+          total: userStudyPlanCount.length,
         },
-        user: req.user
-      }
+        user: req.user,
+      },
     });
   } catch (error) {
     console.error('Get user stats error:', error);
     res.status(500).json({
       success: false,
       error: {
-        message: 'Internal server error'
-      }
+        message: 'Internal server error',
+      },
     });
   }
 });
